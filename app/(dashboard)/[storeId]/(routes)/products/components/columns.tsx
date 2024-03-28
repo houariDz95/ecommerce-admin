@@ -44,7 +44,7 @@ export const columns: ColumnDef<ProductColumn>[] = [
       <div className="flex items-center gap-x-2">
         {row.original.sizes.length > 0 ? (
           row.original.sizes.map((size, index) => (
-           <span>{size}</span>
+           <span key={index}>{size}</span>
           ))
         ) : (
           <span>No color available</span>
