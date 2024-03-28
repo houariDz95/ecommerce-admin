@@ -101,8 +101,6 @@ export async function GET(
       where: {
         storeId: params.storeId,
         categoryId,
-        colors: { some: { id: { in: colorIds } } },
-        sizes: { some: { id: { in: sizeIds } } },
         isFeatured: isFeatured ? true : undefined,
         isArchived: false,
       },
