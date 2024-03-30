@@ -19,8 +19,8 @@ export async function GET(
       include: {
         images: true,
         category: true,
-        sizes: true,
-        colors: true,
+        productColors: true,
+        productSizes: true,
       }
     });
   
@@ -69,8 +69,6 @@ export async function DELETE(
     return new NextResponse("Internal error", { status: 500 });
   }
 };
-
-
 export async function PATCH(
   req: Request,
   { params }: { params: { productId: string, storeId: string } }
@@ -83,9 +81,9 @@ export async function PATCH(
     }
 
     const body = await req.json();
-    const { name, price, categoryId, colors, sizes, images, isFeatured, isArchived } = body;
+    const { name, price, categoryId, images, isFeatured, isArchived, colors, sizes } = body;
 
-    // Verify if the user has access to the store
+    // Verify user's access to the store
     const storeByUserId = await prismaDb.store.findFirst({
       where: {
         id: params.storeId,
@@ -96,6 +94,10 @@ export async function PATCH(
     if (!storeByUserId) {
       return new NextResponse("Unauthorized", { status: 405 });
     }
+
+    // Extract the IDs from the colors and sizes arrays
+    const colorIds = colors.map((color: { value: string }) => color.value);
+    const sizeIds = sizes.map((size: { value: string }) => size.value);
 
     // Update the product
     const updatedProduct = await prismaDb.product.update({
@@ -108,22 +110,32 @@ export async function PATCH(
         isFeatured,
         isArchived,
         categoryId,
+        // Connect the images to the product
         images: {
           deleteMany: {}, // Delete existing images
           createMany: {
             data: images.map((image: { url: string }) => ({ url: image.url })),
           },
         },
-        colors: {
-          set: await getValidColorIds(colors), // Validate and update color IDs
+        // Update product-color associations
+        productColors: {
+          deleteMany: {}, // Delete existing color associations
+          createMany: {
+            data: colorIds.map((colorId: string) => ({ colorId })),
+          },
         },
-        sizes: {
-          set: await getValidSizeIds(sizes), // Validate and update size IDs
+        // Update product-size associations
+        productSizes: {
+          deleteMany: {}, // Delete existing size associations
+          createMany: {
+            data: sizeIds.map((sizeId: string) => ({ sizeId })),
+          },
         },
       },
+      // Include the associated colors and sizes in the response
       include: {
-        colors: true,
-        sizes: true,
+        productColors: true,
+        productSizes: true,
       },
     });
 
@@ -132,34 +144,4 @@ export async function PATCH(
     console.log('[PRODUCTS_PATCH]', error);
     return new NextResponse("Internal error", { status: 500 });
   }
-}
-
-// Function to validate and retrieve valid color IDs
-async function getValidColorIds(colors: { value: string }[]) {
-  const validColorIds = await prismaDb.color.findMany({
-    where: {
-      id: {
-        in: colors.map((color) => color.value),
-      },
-    },
-    select: {
-      id: true,
-    },
-  });
-  return validColorIds.map((color) => ({ id: color.id }));
-}
-
-// Function to validate and retrieve valid size IDs
-async function getValidSizeIds(sizes: { value: string }[]) {
-  const validSizeIds = await prismaDb.size.findMany({
-    where: {
-      id: {
-        in: sizes.map((size) => size.value),
-      },
-    },
-    select: {
-      id: true,
-    },
-  });
-  return validSizeIds.map((size) => ({ id: size.id }));
 }

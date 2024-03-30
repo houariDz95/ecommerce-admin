@@ -14,8 +14,8 @@ const ProductPage = async ({
     },
     include: {
       images: true,
-      sizes: true,
-      colors: true,
+      productColors: true,
+      productSizes: true,
     },
   });
 
@@ -40,9 +40,16 @@ const ProductPage = async ({
 
   const initialData = product ? {
     ...product,
-    colors: product?.colors.map(color => ({ label: color.name, value: color.id })),
-    sizes: product?.sizes.map(size => ({ label: size.name, value: size.id }))
-  } : null
+    colors: await Promise.all(product.productColors.map(async color => {
+      const colorData = await prismaDb.color.findUnique({ where: { id: color.colorId } });
+      return { label: colorData?.name ?? 'Unknown', value: color.colorId };
+    })),
+    sizes: await Promise.all(product.productSizes.map(async size => {
+      const sizeData = await prismaDb.size.findUnique({ where: { id: size.sizeId } });
+      return { label: sizeData?.name ?? 'Unknown', value: size.sizeId };
+    }))
+  } : null;
+  
 
   return ( 
     <div className="flex-col">

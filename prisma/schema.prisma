@@ -55,7 +55,6 @@ model Category {
   @@index([storeId])
   @@index([billboardId])
 }
-
 model Product {
   id          String      @id @default(auto()) @map("_id") @db.ObjectId
   storeId     String      @db.ObjectId
@@ -66,9 +65,9 @@ model Product {
   price       Int
   isFeatured  Boolean     @default(false)
   isArchived  Boolean     @default(false)
-  orderItems  OrderItem[] 
-  colors      Color[]     // Relation to Color model
-  sizes       Size[]      // Relation to Size model
+  orderItems  OrderItem[]
+  productColors ColorOnProduct[]
+  productSizes SizeOnProduct[]
   images      Image[]     // Relation to Image model
   createdAt   DateTime    @default(now())
   updatedAt   DateTime    @updatedAt
@@ -83,8 +82,7 @@ model Color {
   store       Store    @relation("StoreToColor", fields: [storeId], references: [id])
   name        String
   value       String
-  productId   String?   @db.ObjectId
-  product     Product?  @relation(fields: [productId], references: [id], onDelete: Cascade)
+  productColors ColorOnProduct[]
   createdAt   DateTime  @default(now())
   updatedAt   DateTime  @updatedAt
 
@@ -97,12 +95,37 @@ model Size {
   store       Store     @relation("StoreToSize", fields: [storeId], references: [id])
   name        String
   value       String
-  productId   String?   @db.ObjectId
-  product     Product?  @relation(fields: [productId], references: [id], onDelete: Cascade)
+  productSizes SizeOnProduct[]
   createdAt   DateTime  @default(now())
   updatedAt   DateTime  @updatedAt
 
   @@index([storeId])
+}
+
+model ColorOnProduct {
+  id          String    @id @default(auto()) @map("_id") @db.ObjectId
+  productId   String    @db.ObjectId
+  product     Product   @relation(fields: [productId], references: [id])
+  colorId     String    @db.ObjectId
+  color       Color     @relation(fields: [colorId], references: [id])
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+
+  @@index([productId])
+  @@index([colorId])
+}
+
+model SizeOnProduct {
+  id          String    @id @default(auto()) @map("_id") @db.ObjectId
+  productId   String    @db.ObjectId
+  product     Product   @relation(fields: [productId], references: [id])
+  sizeId      String    @db.ObjectId
+  size        Size      @relation(fields: [sizeId], references: [id])
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+
+  @@index([productId])
+  @@index([sizeId])
 }
 
 model Image {

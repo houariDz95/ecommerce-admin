@@ -2,7 +2,6 @@ import { NextResponse } from 'next/server';
 import { auth } from '@clerk/nextjs';
 import prismaDb from '@/lib/prismaDb';
 
-
 export async function POST(
   req: Request,
   { params }: { params: { storeId: string } }
@@ -15,8 +14,11 @@ export async function POST(
     }
 
     const body = await req.json();
-    const { name, price, categoryId, colors, sizes, images, isFeatured, isArchived } = body;
+    const { name, price, categoryId, images, isFeatured, isArchived, colors, sizes } = body;
 
+    // Extract the IDs from the colors array
+    const colorIds = colors.map((color: { value: string }) => color.value);
+    const sizeIds = sizes.map((size: { value: string }) => size.value);
     // Create the product
     const product = await prismaDb.product.create({
       data: {
@@ -32,20 +34,26 @@ export async function POST(
             data: images.map((image: { url: string }) => ({ url: image.url })),
           },
         },
-        // Connect colors and sizes to the product
-        colors: {
-          connect: await getValidColorIds(colors), // Validate color IDs
+        // Create product-color associations
+        productColors: {
+          createMany: {
+            data: colorIds.map((colorId: string) => ({ colorId })),
+          },
         },
-        sizes: {
-          connect: await getValidSizeIds(sizes), // Validate size IDs
+        // Create product-size associations
+        productSizes: {
+          createMany: {
+            data: sizeIds.map((sizeId: string) => ({ sizeId })),
+          },
         },
       },
-      // Include the colors and sizes in the response
+      // Include the associated colors and sizes in the response
       include: {
-        colors: true,
-        sizes: true,
+        productColors: true,
+        productSizes: true,
       },
     });
+
     return NextResponse.json(product);
   } catch (error) {
     console.log('[PRODUCTS_POST]', error);
@@ -53,34 +61,7 @@ export async function POST(
   }
 }
 
-async function getValidColorIds(colors: { value: string }[]) {
-  const validColorIds = await prismaDb.color.findMany({
-    where: {
-      id: {
-        in: colors.map((color) => color.value),
-      },
-    },
-    select: {
-      id: true,
-    },
-  });
-  return validColorIds.map((color) => ({ id: color.id }));
-}
 
-// Function to validate and retrieve valid size IDs
-async function getValidSizeIds(sizes: { value: string }[]) {
-  const validSizeIds = await prismaDb.size.findMany({
-    where: {
-      id: {
-        in: sizes.map((size) => size.value),
-      },
-    },
-    select: {
-      id: true,
-    },
-  });
-  return validSizeIds.map((size) => ({ id: size.id }));
-}
 
 export async function GET(
   req: Request,
@@ -89,8 +70,6 @@ export async function GET(
   try {
     const { searchParams } = new URL(req.url)
     const categoryId = searchParams.get('categoryId') || undefined;
-    const colorIds = searchParams.getAll('colorId') || [];
-    const sizeIds = searchParams.getAll('sizeId') || [];
     const isFeatured = searchParams.get('isFeatured');
 
     if (!params.storeId) {
@@ -107,8 +86,8 @@ export async function GET(
       include: {
         images: true,
         category: true,
-        colors: true,
-        sizes: true,
+        productColors: true,
+        productSizes: true
       },
       orderBy: {
         createdAt: 'desc',
