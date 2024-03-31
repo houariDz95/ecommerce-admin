@@ -19,8 +19,8 @@ export async function GET(
       include: {
         images: true,
         category: true,
-        productColors: true,
-        productSizes: true,
+        productColors: {include: {color: true}},
+        productSizes: {include: {size: true}},
       }
     });
   
@@ -134,8 +134,8 @@ export async function PATCH(
       },
       // Include the associated colors and sizes in the response
       include: {
-        productColors: {include: {color: true}},
-        productSizes: {include: {size: true}},
+        productColors: true,
+        productSizes: true,
       },
     });
 
