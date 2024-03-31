@@ -105,7 +105,7 @@ model Size {
 model ColorOnProduct {
   id          String    @id @default(auto()) @map("_id") @db.ObjectId
   productId   String    @db.ObjectId
-  product     Product   @relation(fields: [productId], references: [id])
+  product     Product   @relation(fields: [productId], references: [id], onDelete: Cascade)
   colorId     String    @db.ObjectId
   color       Color     @relation(fields: [colorId], references: [id])
   createdAt   DateTime  @default(now())
@@ -118,7 +118,7 @@ model ColorOnProduct {
 model SizeOnProduct {
   id          String    @id @default(auto()) @map("_id") @db.ObjectId
   productId   String    @db.ObjectId
-  product     Product   @relation(fields: [productId], references: [id])
+  product     Product   @relation(fields: [productId], references: [id], onDelete: Cascade)
   sizeId      String    @db.ObjectId
   size        Size      @relation(fields: [sizeId], references: [id])
   createdAt   DateTime  @default(now())

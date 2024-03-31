@@ -73,6 +73,7 @@ export const SettingsForm: React.FC<SettingsFormProps> = ({
       toast.success('Store deleted.');
     } catch (error: any) {
       toast.error('Make sure you removed all products and categories first.');
+      console.log(error);
     } finally {
       setLoading(false);
       setOpen(false);
