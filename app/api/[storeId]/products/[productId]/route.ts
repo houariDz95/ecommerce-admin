@@ -134,8 +134,8 @@ export async function PATCH(
       },
       // Include the associated colors and sizes in the response
       include: {
-        productColors: true,
-        productSizes: true,
+        productColors: {include: {color: true}},
+        productSizes: {include: {size: true}},
       },
     });
 
