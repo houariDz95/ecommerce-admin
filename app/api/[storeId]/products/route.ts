@@ -86,8 +86,16 @@ export async function GET(
       include: {
         images: true,
         category: true,
-        productColors: true,
-        productSizes: true
+        productColors: {
+          include: {
+            color: true
+          }
+        },
+        productSizes: {
+          include: {
+            size: true
+          }
+        }
       },
       orderBy: {
         createdAt: 'desc',
