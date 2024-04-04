@@ -1,6 +1,17 @@
 import { NextResponse } from 'next/server';
 import prismaDb from '@/lib/prismaDb';
 
+
+const corsHeaders = {
+  "Access-Control-Allow-Origin": "*",
+  "Access-Control-Allow-Methods": "GET, POST, PUT, DELETE, OPTIONS",
+  "Access-Control-Allow-Headers": "Content-Type, Authorization",
+};
+
+export async function OPTIONS() {
+  return NextResponse.json({}, { headers: corsHeaders });
+}
+
 interface OrderItemProps {
     productId: string;
     choosenColor: string;
@@ -37,7 +48,7 @@ export async function POST(
       },
     });
 
-    return NextResponse.json(order);
+    return NextResponse.json(order, {headers: corsHeaders});
   } catch (error) {
     console.error('[ORDER_POST]', error);
     return new NextResponse("Internal error", { status: 500 });
