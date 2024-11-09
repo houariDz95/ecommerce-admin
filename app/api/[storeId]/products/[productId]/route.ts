@@ -117,21 +117,23 @@ export async function PATCH(
             data: images.map((image: { url: string }) => ({ url: image.url })),
           },
         },
-        // Update product-color associations
-        productColors: {
-          deleteMany: {}, // Delete existing color associations
-          createMany: {
-            data: colorIds.map((colorId: string) => ({ colorId })),
-          },
+        // Only create product-color associations if colors are provided
+        productColors: colorIds.length > 0
+          ? {
+              createMany: {
+                data: colorIds.map((colorId: string) => ({ colorId })),
+              },
+            }
+          : undefined,
+        // Only create product-size associations if sizes are provided
+        productSizes: sizeIds.length > 0
+          ? {
+              createMany: {
+                data: sizeIds.map((sizeId: string) => ({ sizeId })),
+              },
+            }
+          : undefined,
         },
-        // Update product-size associations
-        productSizes: {
-          deleteMany: {}, // Delete existing size associations
-          createMany: {
-            data: sizeIds.map((sizeId: string) => ({ sizeId })),
-          },
-        },
-      },
       // Include the associated colors and sizes in the response
       include: {
         productColors: true,
