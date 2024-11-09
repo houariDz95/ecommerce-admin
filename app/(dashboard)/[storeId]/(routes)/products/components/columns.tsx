@@ -47,7 +47,7 @@ export const columns: ColumnDef<ProductColumn>[] = [
            <span key={index}>{size}</span>
           ))
         ) : (
-          <span>No color available</span>
+          <span>No size available</span>
         )}
       </div>
     )

@@ -55,26 +55,29 @@ model Category {
   @@index([storeId])
   @@index([billboardId])
 }
+
 model Product {
-  id          String      @id @default(auto()) @map("_id") @db.ObjectId
-  storeId     String      @db.ObjectId
-  store       Store       @relation("StoreToProduct", fields: [storeId], references: [id])
-  categoryId  String      @db.ObjectId
-  category    Category    @relation("CategoryToProduct", fields: [categoryId], references: [id])
-  name        String
-  price       Int
-  isFeatured  Boolean     @default(false)
-  isArchived  Boolean     @default(false)
-  orderItems  OrderItem[]
-  productColors ColorOnProduct[]
-  productSizes SizeOnProduct[]
-  images      Image[]     // Relation to Image model
-  createdAt   DateTime    @default(now())
-  updatedAt   DateTime    @updatedAt
+  id            String           @id @default(auto()) @map("_id") @db.ObjectId
+  storeId       String           @db.ObjectId
+  store         Store            @relation("StoreToProduct", fields: [storeId], references: [id])
+  categoryId    String           @db.ObjectId
+  category      Category         @relation("CategoryToProduct", fields: [categoryId], references: [id])
+  name          String
+  price         Int
+  isFeatured    Boolean          @default(false)
+  isArchived    Boolean          @default(false)
+  orderItems    OrderItem[]
+  productColors ColorOnProduct[] 
+  productSizes  SizeOnProduct[] 
+  images        Image[]          
+  createdAt     DateTime         @default(now())
+  updatedAt     DateTime         @updatedAt
 
   @@index([storeId])
   @@index([categoryId])
 }
+
+
 
 model Color {
   id          String    @id @default(auto()) @map("_id") @db.ObjectId
@@ -150,7 +153,7 @@ model Order {
   city    String @default("")
   deliveryPrice Int
   createdAt DateTime  @default(now())
-  updatedAt DateTime  @updatedAt
+  updatedAt DateTime  @updatedAt 
 
   @@index([storeId])
 }

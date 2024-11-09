@@ -16,9 +16,10 @@ export async function POST(
     const body = await req.json();
     const { name, price, categoryId, images, isFeatured, isArchived, colors, sizes } = body;
 
-    // Extract the IDs from the colors array
-    const colorIds = colors.map((color: { value: string }) => color.value);
-    const sizeIds = sizes.map((size: { value: string }) => size.value);
+    // Extract IDs only if colors and sizes are provided
+    const colorIds = colors ? colors.map((color: { value: string }) => color.value) : [];
+    const sizeIds = sizes ? sizes.map((size: { value: string }) => size.value) : [];
+
     // Create the product
     const product = await prismaDb.product.create({
       data: {
@@ -34,18 +35,22 @@ export async function POST(
             data: images.map((image: { url: string }) => ({ url: image.url })),
           },
         },
-        // Create product-color associations
-        productColors: {
-          createMany: {
-            data: colorIds.map((colorId: string) => ({ colorId })),
-          },
-        },
-        // Create product-size associations
-        productSizes: {
-          createMany: {
-            data: sizeIds.map((sizeId: string) => ({ sizeId })),
-          },
-        },
+        // Only create product-color associations if colors are provided
+        productColors: colorIds.length > 0
+          ? {
+              createMany: {
+                data: colorIds.map((colorId: string) => ({ colorId })),
+              },
+            }
+          : undefined,
+        // Only create product-size associations if sizes are provided
+        productSizes: sizeIds.length > 0
+          ? {
+              createMany: {
+                data: sizeIds.map((sizeId: string) => ({ sizeId })),
+              },
+            }
+          : undefined,
       },
       // Include the associated colors and sizes in the response
       include: {

@@ -28,7 +28,7 @@ export async function POST(
 
     // Create the order
     const order = await prismaDb.order.create({
-      data: {
+      data: { 
         storeId: params.storeId,
         phone: phone,
         address: address,
@@ -40,7 +40,7 @@ export async function POST(
             color: item.choosenColor,
             size: item.choosenSize,
             quantity: item.quantity
-          }))
+          })) 
         }
       },
       include: {
@@ -48,9 +48,10 @@ export async function POST(
       },
     });
 
-    return NextResponse.json(order, {headers: corsHeaders});
+    return NextResponse.json(order, { headers: corsHeaders });
   } catch (error) {
     console.error('[ORDER_POST]', error);
     return new NextResponse("Internal error", { status: 500 });
   }
 }
+ 
